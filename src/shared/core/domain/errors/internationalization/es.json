@@ -1,0 +1,7 @@
+{
+  "UnexpectedError": "Ha ocurrido un error inesperado. %error%",
+  "TransactionalError": "Ha ocurrido un error transaccional",
+  "ValidationErrorGreaterThan": "'%argumentPath%' debe ser mayor que '%minValue%'",
+  "ValidationErrorAgainstNullOrUndefined": "El campo '%argumentPath%' debe ser definido`",
+  "ValidationErrorAgainstAtLeast": "'%argumentPath%' debe tener como máximo '%numChars%' caracteres`"
+}
