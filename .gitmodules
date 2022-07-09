@@ -1,0 +1,3 @@
+[submodule "backend-nest-core"]
+	path = src/shared/core
+	url = https://github.com/omartin9203/backend-nest-core

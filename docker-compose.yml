@@ -1,0 +1,37 @@
+version: "3.3"
+
+services:
+  dspot-test-backend:
+    image: dspot-backend
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 4000:4000
+    env_file:
+      - ./.env
+    depends_on:
+      - mongodb
+    networks:
+      - appnetwork
+    volumes:
+      - ./:/var/www/app
+
+  mongodb:
+    image: mongo
+    restart: always
+    container_name: mongodb
+    volumes:
+      - mongodata:/data/db
+    ports:
+      - 27017:27017
+    networks:
+      - appnetwork
+
+#Docker Networks
+networks:
+  # All container connect in a network
+  appnetwork:
+    driver: bridge
+volumes:
+  mongodata: {}
