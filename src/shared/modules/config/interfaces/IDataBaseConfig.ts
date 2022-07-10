@@ -6,10 +6,18 @@
  */
 export interface IDataBaseConfig {
   /**
-   * Database connection string. Could be useful with MongoDb.
+   * MongoDb database url. Could be useful with MongoDb.
    *
    * @type {string}
    * @memberof IDataBaseConfig
    */
-  connectString?: string;
+  mongoUrl: string;
+
+  /**
+   * PostgresSQL database url. Could be useful with PostgresSQL.
+   *
+   * @type {string}
+   * @memberof IDataBaseConfig
+   */
+  postgresUrl: string;
 }

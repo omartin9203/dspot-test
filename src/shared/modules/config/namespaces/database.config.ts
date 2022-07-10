@@ -2,10 +2,10 @@ import { registerAs } from '@nestjs/config';
 import * as Joi from '@hapi/joi';
 
 export const databaseConfig = registerAs('database', () => ({
-  connectString: process.env.DATABASE_CONNECT_STRING,
+  mongoUrl: process.env.MONGO_DATABASE_URL,
+  postgresUrl: process.env.POSTGRES_DATABASE_URL,
 }));
 export const databaseSchema = {
-  DATABASE_CONNECT_STRING: Joi
-    .string()
-    .required(),
+  MONGO_DATABASE_URL: Joi.string().required(),
+  POSTGRES_DATABASE_URL: Joi.string().required(),
 };

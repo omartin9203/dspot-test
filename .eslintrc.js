@@ -8,8 +8,7 @@ module.exports = {
   extends: [
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
-    'prettier',
-    'prettier/@typescript-eslint',
+    'prettier'
   ],
   root: true,
   env: {
@@ -18,9 +17,9 @@ module.exports = {
   },
   rules: {
     '@typescript-eslint/unified-signatures': 'off',
-    '@typescript-eslint/explicit-function-return-type': 'warn',
+    '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-unused-vars': ['error', {"varsIgnorePattern": "^_", "argsIgnorePattern": "^_"}],
-    '@typescript-eslint/no-explicit-any': 'warn',
+    '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-namespace': 'off',
     '@typescript-eslint/no-empty-function': 'warn',
     '@typescript-eslint/naming-convention': [
@@ -33,6 +32,7 @@ module.exports = {
             "match": true
           }
         }
-      ]
+      ],
+    '@typescript-eslint/interface-name-prefix': 'off',
     },
 };

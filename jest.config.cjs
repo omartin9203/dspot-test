@@ -15,6 +15,7 @@ module.exports = {
     moduleFileExtensions: [
         'ts',
         'tsx',
+        "json",
         'js'
     ],
     moduleNameMapper: {
@@ -28,5 +29,7 @@ module.exports = {
     coveragePathIgnorePatterns: [
         '^.+\\.d\\.ts$',
         'src/full\\.ts$'
-    ]
+    ],
+    "rootDir": "src",
+    "testEnvironment": "node",
 };

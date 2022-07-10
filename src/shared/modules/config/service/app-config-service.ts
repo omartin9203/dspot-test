@@ -25,8 +25,8 @@ export class AppConfigService {
   };
 
   database: IDataBaseConfig = {
-    connectString:
-      this._configService.get<string>('database.connectString'),
+    mongoUrl: this._configService.get<string>('database.mongoUrl'),
+    postgresUrl: this._configService.get<string>('database.postgresUrl'),
   };
 
   graphql: IGraphqlConfig = {

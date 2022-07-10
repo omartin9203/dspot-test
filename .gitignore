@@ -26,12 +26,10 @@ yarn.lock
 !.vscode/tasks.json
 .vscode/launch.json
 !.vscode/extensions.json
+!.vscode/launch.json
 
 # GQL - Schema
 *.gql
-
-## Env
-#.env*
 
 package-lock.json
 orm.config.json
@@ -63,3 +61,10 @@ $RECYCLE.BIN/
 
 Thumbs.db
 UserInterfaceState.x
+
+# Logs
+logs
+*.log
+
+# dotenv
+.env
