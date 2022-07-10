@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Install dependencies
-        run: npm ci
+        run: npm i
       - name: ESLint
         run: npm run lint
       - name: Prettier
