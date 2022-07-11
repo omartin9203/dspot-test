@@ -91,7 +91,7 @@
     "lint-staged": "^13.0.3",
     "prettier": "^2.7.1",
     "supertest": "^4.0.2",
-    "ts-jest": "26.1.0",
+    "ts-jest": "28.0.5",
     "ts-loader": "^6.2.1",
     "ts-node": "^8.6.2",
     "ts-transformer-keys": "^0.4.3",
