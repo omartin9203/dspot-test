@@ -1,0 +1,110 @@
+version: 2.1
+
+jobs:
+  checkout:
+    working_directory: ~/dspot-test
+    docker:
+      - image: cimg/node:14.19-browsers
+    steps:
+      - checkout
+      - save_cache:
+          key: v0-repo-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - ~/dspot-test
+  dependencies:
+    working_directory: ~/dspot-test
+    docker:
+      - image: cimg/node:14.19-browsers
+    steps:
+      - restore_cache:
+          key: v0-repo-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
+      - restore_cache:
+          key: v0-node-{{ .Branch }}-{{ checksum "package.json" }}
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - save_cache:
+          key: v0-node-{{ .Branch }}-{{ checksum "package.json" }}
+          paths:
+            - ~/dspot-test/node_modules
+  lint:
+    working_directory: ~/dspot-test
+    docker:
+      - image: cimg/node:14.19-browsers
+    steps:
+      - restore_cache:
+          key: v0-repo-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
+      - restore_cache:
+          key: v0-node-{{ .Branch }}-{{ checksum "package.json" }}
+      - run:
+          name: ESLint
+          command: npm run lint
+      - run:
+          name: Prettier
+          command: npm run prettier:check
+  test:
+    working_directory: ~/dspot-test
+    docker:
+      - image: cimg/node:14.19-browsers
+      - image: mongo
+      - image: cimg/postgres:14.2
+        environment:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+    steps:
+      - restore_cache:
+          key: v0-repo-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
+      - restore_cache:
+          key: v0-node-{{ .Branch }}-{{ checksum "package.json" }}
+      - run:
+          name: Test
+          command: npm run test
+      - run:
+          name: Copy .env
+          command: cp .env.dist .env
+      - run:
+          name: Wait for Mongo to start
+          command: dockerize -wait tcp://localhost:27017 -timeout 1m
+      - run:
+          name: Wait for Postgres to start
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+      - run:
+          name: E2E
+          command: npm run test:e2e
+  build:
+    working_directory: ~/dspot-test
+    docker:
+      - image: cimg/node:14.19-browsers
+    steps:
+      - restore_cache:
+          key: v0-repo-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
+      - restore_cache:
+          key: v0-node-{{ .Branch }}-{{ checksum "package.json" }}
+      - run:
+          name: Build
+          command: npm run build
+      - save_cache:
+          key: v0-build-{{ .Branch }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - ~/dspot-test/dist/dspot-test
+
+workflows:
+  version: 2
+  ci:
+    jobs:
+      - checkout
+      - dependencies:
+          requires:
+            - checkout
+      - lint:
+          requires:
+            - dependencies
+      - test:
+          requires:
+            - lint
+      - build:
+          requires:
+            - test

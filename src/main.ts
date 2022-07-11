@@ -20,10 +20,7 @@ async function bootstrap(): Promise<void> {
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   await app.listen(port);
-  Logger.log(
-    `🚀 Server running on port :${configService.app.port}`,
-    'NestApplication',
-  );
+  Logger.log(`🚀 Server running on port :${configService.app.port}`, 'NestApplication');
 }
 
 bootstrap();
