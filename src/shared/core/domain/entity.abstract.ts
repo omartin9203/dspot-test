@@ -1,18 +1,20 @@
-import { IEntity, BaseProps } from './interfaces/IEntity';
+import { IEntity, EntityBaseProps, BaseProps } from './interfaces/IEntity';
 import { Identifier } from './Identifier';
 
 export abstract class DomainEntity<T extends BaseProps> implements IEntity {
-  public readonly _id: Identifier;
-  protected readonly props: T;
+  protected constructor(protected readonly props: EntityBaseProps<T>, public readonly id: Identifier) {}
 
-  protected constructor(props: T, id: Identifier) {
-    this._id = id;
-    this.props = props;
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+
+  get updatedAt(): Date {
+    return this.props.updatedAt;
   }
 
   public equals(entity: DomainEntity<T>): boolean {
     if (entity === null || entity === undefined) return false;
     if (this === entity) return true;
-    return this._id === entity._id;
+    return this.id === entity.id;
   }
 }

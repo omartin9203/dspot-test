@@ -1,22 +1,18 @@
 import { AggregateRoot } from '@nestjs/cqrs';
-import { IEntity, BaseProps } from './interfaces/IEntity';
+import { IEntity, EntityBaseProps, BaseProps } from './interfaces/IEntity';
 import { Identifier } from './Identifier';
 import { Logger } from '@nestjs/common';
 
-export abstract class AggregateDomainEntity<TProps extends BaseProps>
-  extends AggregateRoot
-  implements IEntity {
-  public readonly _id: Identifier;
-  protected readonly props: TProps;
+export abstract class AggregateDomainEntity<TProps extends BaseProps> extends AggregateRoot implements IEntity {
   protected _logger: Logger;
 
   protected constructor(
-    props: TProps,
-    id: Identifier,
-    ctx: string = 'AggregateDomainEntity',
+    protected readonly props: EntityBaseProps<TProps>,
+    public readonly id: Identifier,
+    ctx = 'AggregateDomainEntity'
   ) {
     super();
-    this._id = id;
+    this.id = id;
     this.props = props;
     this._logger = new Logger(ctx);
   }
@@ -24,6 +20,14 @@ export abstract class AggregateDomainEntity<TProps extends BaseProps>
   public equals(entity: AggregateDomainEntity<TProps>): boolean {
     if (entity === null || entity === undefined) return false;
     if (this === entity) return true;
-    return this._id === entity._id;
+    return this.id === entity.id;
+  }
+
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+
+  get updatedAt(): Date {
+    return this.props.updatedAt;
   }
 }

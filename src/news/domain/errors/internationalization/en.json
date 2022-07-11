@@ -1,7 +1,0 @@
-{
-  "NewsIsAlreadyUnavailable": "News '%code%' is already in the unavailable state",
-  "NewsIsAlreadyAvailable": "News '%code%' is already in the available state",
-  "NewsIsInactive": "News '%code%' is inactive",
-  "NewsByCodeDoesNotExist": "News '%code%' does not exist",
-  "NewsByCodeAlreadyExist": "News '%code%' already exist"
-}

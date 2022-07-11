@@ -1,7 +1,7 @@
 dist: focal
 language: node_js
 node_js:
-  - '^14.17.0'
+  - '^14.19.0'
   - '^16.10.0'
   - '^18.0.0'
 
@@ -24,6 +24,7 @@ script:
   - npm run test
   - cp .env.dist .env
   - docker-compose up -d --build postgres
+  - docker-compose up -d --build mongodb
   - docker ps -a
   - npm run test:e2e
   - npm run build

@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: ['^14.20.0', '^16.10.0', '^18.0.0']
+        node: ['^14.19.0', '^16.10.0', '^18.0.0']
 
     steps:
       - name: Checkout source code
@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Install dependencies
-        run: npm i
+        run: npm ci
       - name: ESLint
         run: npm run lint
       - name: Prettier

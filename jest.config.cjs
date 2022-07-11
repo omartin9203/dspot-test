@@ -30,6 +30,6 @@ module.exports = {
         '^.+\\.d\\.ts$',
         'src/full\\.ts$'
     ],
-    "rootDir": "src",
+    // "rootDir": "src",
     "testEnvironment": "node",
 };

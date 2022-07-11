@@ -4,13 +4,13 @@ import { PersistentEntity } from './base.entity';
 import { IEntity } from 'src/shared/core/domain/interfaces/IEntity';
 import { PageParams } from '../../../core/application/PaginatorParams';
 import { PaginatedFindResult } from '../../../core/application/PaginatedFindResult';
-import {UniqueEntityID} from "../../../core/domain/UniqueEntityID";
-import Optional from "../../../core/domain/Option";
-import {WhereType} from "../../../core/domain/types/base-where.type";
-import {OrderByType} from "../../../core/domain/types/base-orderBy.type";
-import {buildWhereFromWhereType} from "./where.builder";
-import {Result} from "../../../core/domain/Result";
-import {AppError} from "../../../core/domain/errors/AppError";
+import { UniqueEntityID } from '../../../core/domain/UniqueEntityID';
+import Optional from '../../../core/domain/Option';
+import { WhereType } from '../../../core/domain/types/base-where.type';
+import { OrderByType } from '../../../core/domain/types/base-orderBy.type';
+import { buildWhereFromWhereType } from './where.builder';
+import { Result } from '../../../core/domain/Result';
+import { AppError } from '../../../core/domain/errors/AppError';
 import { FilterQuery, Model, PopulateOptions } from 'mongoose';
 
 export type FilterableFieldsType<T> = {
@@ -22,16 +22,14 @@ export class BaseRepository<
   P extends PersistentEntity,
   FilterableFields extends FilterableFieldsType<P>,
   IncludesType extends string = string
->
-  implements IRepository<E, FilterableFields, IncludesType> {
-
+> implements IRepository<E, FilterableFields, IncludesType> {
   protected readonly _logger: Logger;
 
   protected constructor(
     protected readonly _model: Model<P>,
     private readonly _domainToPersistentFunc: (domainEntity: E) => Partial<P>,
     readonly _persistentToDomainFunc: (entity: P) => E,
-    context: string,
+    context: string
   ) {
     this._logger = new Logger(context);
   }
@@ -49,13 +47,9 @@ export class BaseRepository<
   }
 
   async save(entity: E): Promise<void> {
-    this._logger.debug(`Save entity with id: {${entity._id}}`);
+    this._logger.debug(`Save entity with id: {${entity.id}}`);
     const persistentEntity = this._domainToPersistentFunc(entity);
-    await this._model.findByIdAndUpdate(
-      persistentEntity.id,
-      {...(persistentEntity as any)},
-      {upsert: true}
-      );
+    await this._model.findByIdAndUpdate(persistentEntity.id, { ...(persistentEntity as any) }, { upsert: true });
     // await new this._model(persistentEntity).save();
   }
 
@@ -66,7 +60,7 @@ export class BaseRepository<
       else subArr = entities.splice(0, entities.length);
       await this._model.create(
         subArr.map((entity: E) => {
-          this._logger.debug(`Save entity with id: {${entity._id}}`);
+          this._logger.debug(`Save entity with id: {${entity.id}}`);
           return this._domainToPersistentFunc(entity);
         })
       );
@@ -74,8 +68,8 @@ export class BaseRepository<
   }
 
   async drop(entity: E): Promise<void> {
-    this._logger.log(`Drop entity with id: {${entity._id}}`);
-    await this._model.findByIdAndDelete(entity._id.toString());
+    this._logger.log(`Drop entity with id: {${entity.id}}`);
+    await this._model.findByIdAndDelete(entity.id.toString());
   }
 
   /**
@@ -102,20 +96,12 @@ export class BaseRepository<
    * @returns  {SkipAndLimitType}
    * @memberof BaseRepository
    */
-  protected extractLimitAndSkipFromRaw(
-    pageLimit = 10,
-    pageNumber = 1,
-  ): SkipAndLimitType {
+  protected extractLimitAndSkipFromRaw(pageLimit = 10, pageNumber = 1): SkipAndLimitType {
     const skip = pageLimit * (pageNumber - 1);
     return { skip, take: pageLimit };
   }
 
-  protected buildPaginated<E>(
-    skip: number,
-    limit: number,
-    count: number,
-    items: E[],
-  ): PaginatedFindResult<E> {
+  protected buildPaginated<E>(skip: number, limit: number, count: number, items: E[]): PaginatedFindResult<E> {
     const totalPages: number = Math.ceil(count / limit);
     const currentPage: number = Math.min(skip / limit + 1, totalPages);
     return {
@@ -127,35 +113,36 @@ export class BaseRepository<
     };
   }
 
-  async findById(
-    id: UniqueEntityID,
-    includes: IncludesType[] = [],
-  ): Promise<Optional<E>> {
+  async findById(id: UniqueEntityID, includes: IncludesType[] = []): Promise<Optional<E>> {
     const entity = await this._model
       .findById(id.toString())
       .populate(includes.map(this.getPopulateOptions))
-      .lean({virtuals: true});
-    return Optional(entity).map(this.transform).map(this._persistentToDomainFunc);
+      .lean({ virtuals: true });
+    return Optional(entity)
+      .map(this.transform)
+      .map(this._persistentToDomainFunc);
   }
 
   async findOne(
     where?: WhereType<FilterableFields>,
     orderBy?: OrderByType<FilterableFields>,
-    includes: IncludesType[] = [],
+    includes: IncludesType[] = []
   ): Promise<Optional<E>> {
     const entity = await this._model
       .findOne(this.buildWhere(where))
       .populate(includes.map(this.getPopulateOptions))
       .sort(this.buildSort(orderBy))
-      .lean({virtuals: true});
-    return Optional(entity).map(this.transform).map(this._persistentToDomainFunc);
+      .lean({ virtuals: true });
+    return Optional(entity)
+      .map(this.transform)
+      .map(this._persistentToDomainFunc);
   }
 
   async getAllPaginated(
     pageParams?: PageParams,
     where?: WhereType<FilterableFields>,
     orderBy?: OrderByType<FilterableFields>,
-    includes: IncludesType[] = [],
+    includes: IncludesType[] = []
   ): Promise<PaginatedFindResult<E>> {
     const { skip, take } = this.extractLimitAndSkipFromRaw(pageParams?.pageLimit, pageParams?.pageNum);
     const filter = this.buildWhere(where);
@@ -166,13 +153,8 @@ export class BaseRepository<
       .sort(this.buildSort(orderBy))
       .skip(skip)
       .limit(take)
-      .lean({virtuals: true});
-    return this.buildPaginated(
-      skip,
-      take,
-      count,
-      items.map(this.transform).map(this._persistentToDomainFunc),
-    );
+      .lean({ virtuals: true });
+    return this.buildPaginated(skip, take, count, items.map(this.transform).map(this._persistentToDomainFunc));
   }
 
   async exist(where: WhereType<FilterableFields>): Promise<boolean> {
@@ -185,7 +167,7 @@ export class BaseRepository<
 
   protected buildSort(orderBy?: OrderByType<FilterableFields>): unknown {
     const fixed = {};
-    Object.keys(orderBy ?? {}).forEach(key => fixed[key] = orderBy[key].toString().toLowerCase());
+    Object.keys(orderBy ?? {}).forEach(key => (fixed[key] = orderBy[key].toString().toLowerCase()));
     return fixed;
   }
 
@@ -193,7 +175,7 @@ export class BaseRepository<
     where?: WhereType<FilterableFields>,
     orderBy?: OrderByType<FilterableFields>,
     includes?: IncludesType[],
-    bashSize = 10,
+    bashSize = 10
   ): AsyncGenerator<Result<E>> {
     let page = 1;
     let hasNext = true;
@@ -211,7 +193,7 @@ export class BaseRepository<
             pageParam.unwrap(),
             where,
             orderBy,
-            includes,
+            includes
           );
           hasNext = currentPage < totalPages;
           for (const item of items) yield Result.Ok<E>(item);
@@ -225,25 +207,22 @@ export class BaseRepository<
   }
 
   protected async updateMany(where: WhereType<FilterableFields>, update: Record<string, unknown>): Promise<number> {
-    const { nModified } = await this._model
-      .updateMany(this.buildWhere(where), update as any)
-      .exec();
+    const { nModified } = await this._model.updateMany(this.buildWhere(where), update as any).exec();
     return nModified;
   }
 
   protected getPopulateOptions(path: string): PopulateOptions {
     const index = path.indexOf('(');
-    const head = path.slice(0, index >=0 ? index : undefined);
+    const head = path.slice(0, index >= 0 ? index : undefined);
     const tail = index >= 0 ? path.slice(index + 1, -1) : undefined;
     return {
       path: head,
       populate: tail?.split(',').map(x => ({
         path: x,
       })),
-    }
+    };
   }
 }
-
 
 type SkipAndLimitType = {
   skip: number;

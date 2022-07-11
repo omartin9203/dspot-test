@@ -23,7 +23,7 @@ module.exports = {
     '@typescript-eslint/no-namespace': 'off',
     '@typescript-eslint/no-empty-function': 'warn',
     '@typescript-eslint/naming-convention': [
-        "warn",
+        "off",
         {
           "selector": "interface",
           "format": ["PascalCase"],
