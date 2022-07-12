@@ -15,6 +15,7 @@ import { ProfileUseCases } from './aplication/use-cases';
 import { ProfileResolvers } from './presentation/resolvers';
 import { ProfileServices } from './presentation/services';
 import { ProfileEventsHandlers } from './presentation/subscribers';
+import { ProfileControllers } from './presentation/controllers';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ProfileEventsHandlers } from './presentation/subscribers';
     ScheduleModule.forRoot(),
     MongooseModule.forFeature([ProfileFeature]),
   ],
+  controllers: [...ProfileControllers],
   providers: [
     {
       provide: 'IUnitOfWorkFactory',

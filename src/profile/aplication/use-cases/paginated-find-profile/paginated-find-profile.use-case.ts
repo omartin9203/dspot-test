@@ -23,7 +23,11 @@ export class PaginatedFindProfileUseCase extends BaseUseCase<
   }
   async execute(request: PaginatedFindProfileUseCaseDto): Promise<PaginatedFindProfileUseCaseResp> {
     this._logger.log('Executing...');
-    const pageParamsOrErr = PageParams.create(request.pageParams);
+    const pageParamsOrErr = PageParams.create({
+      pageNum: 1,
+      pageLimit: 10,
+      ...(request.pageParams ?? {}),
+    });
     if (pageParamsOrErr.isFailure) {
       return Result.Fail(pageParamsOrErr.unwrapError());
     }

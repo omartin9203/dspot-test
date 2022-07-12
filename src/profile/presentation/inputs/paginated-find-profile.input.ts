@@ -6,8 +6,8 @@ import { OrderByProfileInput } from './order-by-profile.input';
 
 @ArgsType()
 export class PaginatedFindProfileInput implements PaginatedFindProfileUseCaseDto {
-  @Field(() => PageParamsInput)
-  pageParams: PageParamsInput;
+  @Field(() => PageParamsInput, { nullable: true })
+  pageParams?: PageParamsInput;
   @Field(() => [WhereProfileInput], { nullable: true })
   where?: [WhereProfileInput];
   @Field(() => OrderByProfileInput, { nullable: true })
