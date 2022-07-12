@@ -10,6 +10,7 @@ import { AppError } from '../../../../shared/core/domain/errors/AppError';
 import { EventPublisher } from '@nestjs/cqrs';
 import { IProfileRepositoryFactory } from '../../../domain/interfeces/IProfileRepositoryFactory';
 import { IUnitOfWork, IUnitOfWorkFactory } from '../../../../shared/core/domain/interfaces/IUnitOfWork';
+import { EntityIdValueObject } from '../../../../shared/core/domain/entity-id.value-object';
 
 @Injectable()
 export class DeleteProfileUseCase extends BaseUseCase<DeleteProfileDto, Result<void>> {
@@ -29,6 +30,8 @@ export class DeleteProfileUseCase extends BaseUseCase<DeleteProfileDto, Result<v
       const unitOfWork: IUnitOfWork = this._unitOfWorkFact.build();
       await unitOfWork.start();
       const repository: IProfileRepository = unitOfWork.getRepository(this._factory);
+      const idOrErr = EntityIdValueObject.create({ id });
+      if (idOrErr.isFailure) return Result.Fail(idOrErr.unwrapError());
       const itemOrNone = await repository.findById(new UniqueEntityID(id));
       if (itemOrNone.isNone()) return Result.Fail(new ProfileErrors.ProfileByCodeDoesNotExist(id));
       const item: Profile = itemOrNone.unwrap();

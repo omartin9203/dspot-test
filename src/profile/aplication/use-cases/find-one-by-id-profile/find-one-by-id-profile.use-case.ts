@@ -7,6 +7,7 @@ import { Profile } from '../../../domain/entities/profile.entity';
 import { FindOneByIdProfileDto } from '../../dto/find-one-by-id-profile.dto';
 import { IProfileRepository } from '../../../domain/interfeces/IProfileRepository';
 import Optional from '../../../../shared/core/domain/Option';
+import { EntityIdValueObject } from '../../../../shared/core/domain/entity-id.value-object';
 
 export type FindOneByIdProfileUseCaseResponse = Result<Optional<Profile>>;
 
@@ -21,6 +22,8 @@ export class FindOneByIdProfileUseCase implements IUseCase<FindOneByIdProfileDto
   }
   async execute(input: FindOneByIdProfileDto): Promise<FindOneByIdProfileUseCaseResponse> {
     this._logger.log('Executing...');
+    const idOrErr = EntityIdValueObject.create({ id: input.id });
+    if (idOrErr.isFailure) return Result.Fail(idOrErr.unwrapError());
     const id = new UniqueEntityID(input.id);
     try {
       return Result.Ok(await this._repository.findById(id, input.includes));
