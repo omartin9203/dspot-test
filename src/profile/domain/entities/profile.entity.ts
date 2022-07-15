@@ -21,9 +21,12 @@ export type ProfileProps = {
   state?: string;
   zipcode?: string;
   available: boolean;
+  friends: Map<string, Optional<Profile>>;
 };
 
-export type CreateProfileProps = Omit<ProfileProps, 'createdAt' | 'updatedAt'>;
+export type CreateProfileProps = Omit<ProfileProps, 'createdAt' | 'updatedAt' | 'friends'> & {
+  friendsIds?: string[];
+};
 
 export class Profile extends AggregateDomainEntity<ProfileProps> {
   get first_name(): string {
@@ -62,6 +65,10 @@ export class Profile extends AggregateDomainEntity<ProfileProps> {
     return this.props.available;
   }
 
+  get friends(): Map<string, Optional<Profile>> {
+    return this.props.friends;
+  }
+
   setUnavailable(): Result<void> {
     if (!this.available) return Result.Fail(new ProfileErrors.ProfileIsAlreadyUnavailable(this.id.toString()));
     this.props.available = false;
@@ -85,12 +92,15 @@ export class Profile extends AggregateDomainEntity<ProfileProps> {
   public static new(props: CreateProfileProps): Result<Profile> {
     const id = new UniqueEntityID();
     const date = new Date();
+    const friends = new Map<string, Optional<Profile>>();
+    (props.friendsIds ?? []).forEach(x => friends.set(x, Optional(null)));
     return this.create(
       {
         ...props,
         available: props.available ?? true,
         createdAt: date,
         updatedAt: date,
+        friends,
       },
       id
     ).map(entity => {

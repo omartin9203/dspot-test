@@ -21,6 +21,6 @@ export type WhereProfile = WhereType<ProfileFilterableFields>;
 
 export type OrderByProfile = OrderByType<ProfileFilterableFields>;
 
-export type IncludesTypeProfile = string;
+export type IncludesTypeProfile = 'friends';
 
 export type IProfileRepository = IRepository<Profile, ProfileFilterableFields, IncludesTypeProfile>;

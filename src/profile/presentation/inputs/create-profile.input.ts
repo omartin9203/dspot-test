@@ -1,4 +1,4 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, ID, InputType } from '@nestjs/graphql';
 import { CreateProfileDto } from '../../aplication/dto/create-profile.dto';
 
 @InputType()
@@ -21,4 +21,6 @@ export class CreateProfileInput implements CreateProfileDto {
   zipcode?: string;
   @Field()
   available: boolean;
+  @Field(() => [ID], { nullable: true })
+  friendsIds?: string[];
 }

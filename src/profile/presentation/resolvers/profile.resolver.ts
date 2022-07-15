@@ -44,6 +44,7 @@ export class ProfileResolver extends BaseResolver {
     const resp = await this._qBus.execute(
       new PaginatedFindProfileQuery({
         ...input,
+        includes: ['friends'],
       })
     );
     if (resp.isFailure) this.handleErrors(resp.unwrapError(), lang);
@@ -63,7 +64,9 @@ export class ProfileResolver extends BaseResolver {
     @CurrentLanguage() lang?: string
   ): Promise<ProfileDto | null> {
     this._logger.log('findOneProfile...');
-    const resp: FindOneProfileUseCaseResponse = await this._qBus.execute(new FindOneProfileQuery(input));
+    const resp: FindOneProfileUseCaseResponse = await this._qBus.execute(
+      new FindOneProfileQuery({ ...input, includes: ['friends'] })
+    );
     if (resp.isFailure) this.handleErrors(resp.unwrapError(), lang);
     const itemOrNone = resp.unwrap().map(ProfileMapper.DomainToDto);
     return itemOrNone.isNone() ? null : itemOrNone.unwrap();
@@ -78,6 +81,7 @@ export class ProfileResolver extends BaseResolver {
     const resp: FindOneByIdProfileUseCaseResponse = await this._qBus.execute(
       new FindOneByIdProfileQuery({
         id,
+        includes: ['friends'],
       })
     );
     if (resp.isFailure) this.handleErrors(resp.unwrapError(), lang);

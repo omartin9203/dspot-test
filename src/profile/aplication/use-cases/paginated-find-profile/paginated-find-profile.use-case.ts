@@ -36,7 +36,12 @@ export class PaginatedFindProfileUseCase extends BaseUseCase<
       request.where instanceof Array ? (request.where.length ? request.where : [{}]) : [request.where ?? {}];
 
     try {
-      const paginated = await this._repository.getAllPaginated(pageParams, request.where, request.order);
+      const paginated = await this._repository.getAllPaginated(
+        pageParams,
+        request.where,
+        request.order,
+        request.includes
+      );
       return Result.Ok(paginated);
     } catch (err) {
       return Result.Fail(new AppError.UnexpectedError(err));
