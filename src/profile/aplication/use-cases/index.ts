@@ -4,6 +4,7 @@ import { UpdateProfileUseCase } from './update-profile/update-profile.use-case';
 import { DeleteProfileUseCase } from './delete-profile/delete-profile.use-case';
 import { FindOneProfileUseCase } from './find-one-profile/find-one-profile.use-case';
 import { FindOneByIdProfileUseCase } from './find-one-by-id-profile/find-one-by-id-profile.use-case';
+import { GenerateProfilesUseCase } from './generate-profiles/generate-profiles.use-case';
 
 export const ProfileUseCases = [
   PaginatedFindProfileUseCase,
@@ -12,4 +13,5 @@ export const ProfileUseCases = [
   CreateProfileUseCase,
   UpdateProfileUseCase,
   DeleteProfileUseCase,
+  GenerateProfilesUseCase,
 ];

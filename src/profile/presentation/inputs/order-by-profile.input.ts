@@ -8,19 +8,23 @@ export class OrderByProfileInput extends BaseOrderByEntityInput implements Order
   @Field(() => OrderByType, { nullable: true })
   first_name?: OrderByType;
   @Field(() => OrderByType, { nullable: true })
-  last_name: OrderByType;
+  last_name?: OrderByType;
   @Field(() => OrderByType, { nullable: true })
-  phone: OrderByType;
+  phone?: OrderByType;
   @Field(() => OrderByType, { nullable: true })
-  img: OrderByType;
+  img?: OrderByType;
   @Field(() => OrderByType, { nullable: true })
-  address: OrderByType;
+  address?: OrderByType;
   @Field(() => OrderByType, { nullable: true })
-  city: OrderByType;
+  city?: OrderByType;
   @Field(() => OrderByType, { nullable: true })
-  state: OrderByType;
+  state?: OrderByType;
   @Field(() => OrderByType, { nullable: true })
-  zipcode: OrderByType;
+  zipcode?: OrderByType;
   @Field(() => OrderByType, { nullable: true })
-  available: OrderByType;
+  available?: OrderByType;
+  @Field(() => OrderByType, { nullable: true })
+  generationCode?: OrderByType;
+  @Field(() => OrderByType, { nullable: true })
+  generationNumber?: OrderByType;
 }

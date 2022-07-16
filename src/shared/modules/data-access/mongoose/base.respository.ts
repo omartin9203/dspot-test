@@ -22,7 +22,8 @@ export class BaseRepository<
   P extends PersistentEntity,
   FilterableFields extends FilterableFieldsType<P>,
   IncludesType extends string = string
-> implements IRepository<E, FilterableFields, IncludesType> {
+> implements IRepository<E, FilterableFields, IncludesType>
+{
   protected readonly _logger: Logger;
 
   protected constructor(
@@ -54,16 +55,8 @@ export class BaseRepository<
   }
 
   async saveMany(entities: E[]): Promise<void> {
-    let subArr = new Array<E>();
-    while (entities.length > 0) {
-      if (entities.length > 500) subArr = entities.splice(0, 500);
-      else subArr = entities.splice(0, entities.length);
-      await this._model.create(
-        subArr.map((entity: E) => {
-          this._logger.debug(`Save entity with id: {${entity.id}}`);
-          return this._domainToPersistentFunc(entity);
-        })
-      );
+    for (const entity of entities) {
+      await this.save(entity);
     }
   }
 
@@ -118,9 +111,7 @@ export class BaseRepository<
       .findById(id.toString())
       .populate(includes.map(this.getPopulateOptions))
       .lean({ virtuals: true });
-    return Optional(entity)
-      .map(this.transform)
-      .map(this._persistentToDomainFunc);
+    return Optional(entity).map(this.transform).map(this._persistentToDomainFunc);
   }
 
   async findOne(
@@ -133,9 +124,7 @@ export class BaseRepository<
       .populate(includes.map(this.getPopulateOptions))
       .sort(this.buildSort(orderBy))
       .lean({ virtuals: true });
-    return Optional(entity)
-      .map(this.transform)
-      .map(this._persistentToDomainFunc);
+    return Optional(entity).map(this.transform).map(this._persistentToDomainFunc);
   }
 
   async getAllPaginated(

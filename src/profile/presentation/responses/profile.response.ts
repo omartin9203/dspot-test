@@ -31,4 +31,8 @@ export class ProfileDto {
   friendsIds: string[];
   @Field(() => [ProfileDto], { nullable: true })
   friends?: ProfileDto[];
+  @Field({ nullable: true })
+  generationCode?: string;
+  @Field({ nullable: true })
+  generationNumber?: number;
 }

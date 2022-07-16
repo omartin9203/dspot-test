@@ -22,6 +22,9 @@ export type ProfileProps = {
   zipcode?: string;
   available: boolean;
   friends: Map<string, Optional<Profile>>;
+
+  generationCode?: string;
+  generationNumber?: number;
 };
 
 export type CreateProfileProps = Omit<ProfileProps, 'createdAt' | 'updatedAt' | 'friends'> & {
@@ -69,6 +72,14 @@ export class Profile extends AggregateDomainEntity<ProfileProps> {
     return this.props.friends;
   }
 
+  get generationCode(): Optional<string> {
+    return Optional(this.props.generationCode);
+  }
+
+  get generationNumber(): Optional<number> {
+    return Optional(this.props.generationNumber);
+  }
+
   setUnavailable(): Result<void> {
     if (!this.available) return Result.Fail(new ProfileErrors.ProfileIsAlreadyUnavailable(this.id.toString()));
     this.props.available = false;
@@ -87,6 +98,22 @@ export class Profile extends AggregateDomainEntity<ProfileProps> {
 
   onDeleted(): void {
     this.apply(new DeletedProfileEvent(ProfileMapper.DomainToDto(this)));
+  }
+
+  addFriendId(friendId: string): void {
+    this.props.friends.set(friendId, Optional(null));
+    //todo: send event
+  }
+
+  addFriend(friend: Profile): Result<void> {
+    if (this.id.equals(friend.id))
+      return Result.Fail(new ProfileErrors.FriendRelationshipAlreadyExist(this.id.toString(), friend.id.toString()));
+    if (!!this.friends.get(friend.id.toString()))
+      return Result.Fail(new ProfileErrors.FriendRelationshipAlreadyExist(this.id.toString(), friend.id.toString()));
+    this.props.friends.set(friend.id.toString(), Optional(null));
+    friend.addFriendId(this.id.toString());
+    //todo: send event
+    return Result.Ok();
   }
 
   public static new(props: CreateProfileProps): Result<Profile> {

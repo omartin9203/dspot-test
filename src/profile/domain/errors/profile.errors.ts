@@ -84,5 +84,18 @@ export namespace ProfileErrors {
     }
   }
 
+  export class FriendRelationshipAlreadyExist extends BaseError {
+    constructor(readonly id1: string, readonly id2: string) {
+      super({
+        name: ProfileErrorCode.ByCodeAlreadyExist,
+        context: _context,
+        internationalization: {
+          variables: { id1, id2 },
+          messagesProvider,
+        },
+      });
+    }
+  }
+
   export type ProfileByCodeAlreadyExistResult<T> = Result<T, ProfileByCodeAlreadyExist>;
 }

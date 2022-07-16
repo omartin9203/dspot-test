@@ -5,4 +5,5 @@ export enum ProfileErrorCode {
   ByCodeDoesNotExist = 'ByCodeDoesNotExist',
   ByCodeAlreadyExist = 'ByCodeAlreadyExist',
   DoesNotExist = 'DoesNotExist',
+  FriendRelationshipAlreadyExist = 'FriendRelationshipAlreadyExist',
 }
