@@ -1,24 +1,23 @@
-import { Injectable, Logger, Inject } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { Result } from 'src/shared/core/domain/Result';
 import { AppError } from 'src/shared/core/domain/errors/AppError';
-import { IUseCase } from 'src/shared/core/domain/interfaces/IUseCase';
 import { UniqueEntityID } from 'src/shared/core/domain/UniqueEntityID';
 import { Profile } from '../../../domain/entities/profile.entity';
 import { FindOneByIdProfileDto } from '../../dto/find-one-by-id-profile.dto';
 import { IProfileRepository } from '../../../domain/interfeces/IProfileRepository';
 import Optional from '../../../../shared/core/domain/Option';
 import { EntityIdValueObject } from '../../../../shared/core/domain/entity-id.value-object';
+import { BaseUseCase } from '../../../../shared/core/application/BaseUseCase';
 
 export type FindOneByIdProfileUseCaseResponse = Result<Optional<Profile>>;
 
 @Injectable()
-export class FindOneByIdProfileUseCase implements IUseCase<FindOneByIdProfileDto, FindOneByIdProfileUseCaseResponse> {
-  private _logger: Logger;
+export class FindOneByIdProfileUseCase extends BaseUseCase<FindOneByIdProfileDto, FindOneByIdProfileUseCaseResponse> {
   constructor(
     @Inject('IProfileRepository')
     private readonly _repository: IProfileRepository
   ) {
-    this._logger = new Logger('FindOneProfileUseCase');
+    super();
   }
   async execute(input: FindOneByIdProfileDto): Promise<FindOneByIdProfileUseCaseResponse> {
     this._logger.log('Executing...');

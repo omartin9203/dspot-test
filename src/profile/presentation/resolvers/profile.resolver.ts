@@ -26,6 +26,9 @@ import { ProfileEventsEnum } from '../../domain/events/profile-events.enum';
 import { GenerateProfilesResponse } from '../responses/generate-profiles.response';
 import { GenerateProfilesCommand } from '../../aplication/commands/impl/generate-profiles.command';
 import { GenerateProfilesUseCaseResp } from '../../aplication/use-cases/generate-profiles/generate-profiles.use-case';
+import { ShorterConnectionResponse } from '../responses/shorter-connection.response';
+import { ShorterConnectionQuery } from '../../aplication/queries/impl/shorter-connection.query';
+import { ShorterConnectionUseCaseResp } from '../../aplication/use-cases/shorter-connection/shorter-connection.use-case';
 
 @Resolver(() => ProfileDto)
 export class ProfileResolver extends BaseResolver {
@@ -115,6 +118,27 @@ export class ProfileResolver extends BaseResolver {
       paginated.totalPages,
       paginated.totalItems
     );
+  }
+
+  @Query(() => ShorterConnectionResponse)
+  async getShorterConnection(
+    @Args('startId', { type: () => ID }) startId: string,
+    @Args('endId', { type: () => ID }) endId: string,
+    @CurrentLanguage() lang?: string
+  ): Promise<ShorterConnectionResponse> {
+    this._logger.log('getShorterConnection...');
+    const resp: ShorterConnectionUseCaseResp = await this._qBus.execute(
+      new ShorterConnectionQuery({
+        startId,
+        endId,
+      })
+    );
+    if (resp.isFailure) this.handleErrors(resp.unwrapError(), lang);
+    const data = resp.unwrap();
+    return {
+      deepCount: data.deepCount,
+      friends: data.friends.map(ProfileMapper.DomainToDto),
+    };
   }
 
   @Mutation(() => SuccessResponse)
