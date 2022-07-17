@@ -21,9 +21,15 @@ export type ProfileProps = {
   state?: string;
   zipcode?: string;
   available: boolean;
+  friends: Map<string, Optional<Profile>>;
+
+  generationCode?: string;
+  generationNumber?: number;
 };
 
-export type CreateProfileProps = Omit<ProfileProps, 'createdAt' | 'updatedAt'>;
+export type CreateProfileProps = Omit<ProfileProps, 'createdAt' | 'updatedAt' | 'friends'> & {
+  friendsIds?: string[];
+};
 
 export class Profile extends AggregateDomainEntity<ProfileProps> {
   get first_name(): string {
@@ -62,6 +68,18 @@ export class Profile extends AggregateDomainEntity<ProfileProps> {
     return this.props.available;
   }
 
+  get friends(): Map<string, Optional<Profile>> {
+    return this.props.friends;
+  }
+
+  get generationCode(): Optional<string> {
+    return Optional(this.props.generationCode);
+  }
+
+  get generationNumber(): Optional<number> {
+    return Optional(this.props.generationNumber);
+  }
+
   setUnavailable(): Result<void> {
     if (!this.available) return Result.Fail(new ProfileErrors.ProfileIsAlreadyUnavailable(this.id.toString()));
     this.props.available = false;
@@ -82,15 +100,34 @@ export class Profile extends AggregateDomainEntity<ProfileProps> {
     this.apply(new DeletedProfileEvent(ProfileMapper.DomainToDto(this)));
   }
 
+  addFriendId(friendId: string): void {
+    this.props.friends.set(friendId, Optional(null));
+    //todo: send event
+  }
+
+  addFriend(friend: Profile): Result<void> {
+    if (this.id.equals(friend.id))
+      return Result.Fail(new ProfileErrors.FriendRelationshipAlreadyExist(this.id.toString(), friend.id.toString()));
+    if (!!this.friends.get(friend.id.toString()))
+      return Result.Fail(new ProfileErrors.FriendRelationshipAlreadyExist(this.id.toString(), friend.id.toString()));
+    this.props.friends.set(friend.id.toString(), Optional(null));
+    friend.addFriendId(this.id.toString());
+    //todo: send event
+    return Result.Ok();
+  }
+
   public static new(props: CreateProfileProps): Result<Profile> {
     const id = new UniqueEntityID();
     const date = new Date();
+    const friends = new Map<string, Optional<Profile>>();
+    (props.friendsIds ?? []).forEach(x => friends.set(x, Optional(null)));
     return this.create(
       {
         ...props,
         available: props.available ?? true,
         createdAt: date,
         updatedAt: date,
+        friends,
       },
       id
     ).map(entity => {

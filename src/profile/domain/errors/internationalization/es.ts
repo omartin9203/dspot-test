@@ -7,4 +7,5 @@ export default {
   [ProfileErrorCode.ByCodeAlreadyExist]: "El Profile '%code%' ya existe",
   [ProfileErrorCode.ByCodeDoesNotExist]: "El Profile '%code%' no existe",
   [ProfileErrorCode.DoesNotExist]: 'No existe ningun elemento con esos requisitos de busqueda',
+  [ProfileErrorCode.FriendRelationshipAlreadyExist]: "El Profile '%id1%' y el '%id2%' ya son amigos",
 };

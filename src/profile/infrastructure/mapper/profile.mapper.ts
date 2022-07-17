@@ -2,9 +2,15 @@ import { ProfileEntity } from '../entities/profile.entity';
 import { Profile } from '../../domain/entities/profile.entity';
 import { UniqueEntityID } from '../../../shared/core/domain/UniqueEntityID';
 import { ProfileDto } from '../../presentation/responses/profile.response';
+import Optional from '../../../shared/core/domain/Option';
 
 export class ProfileMapper {
   public static PersistentToDomain(entity: ProfileEntity): Profile {
+    const friends = new Map<string, Optional<Profile>>();
+    entity.friendsIds.forEach(friendId => {
+      const friend = entity.friends?.find(x => x._id.toString() === friendId);
+      friends.set(friendId.toString(), Optional(friend).map(ProfileMapper.PersistentToDomain));
+    });
     return Profile.create(
       {
         first_name: entity.first_name,
@@ -18,8 +24,11 @@ export class ProfileMapper {
         available: entity.available,
         createdAt: entity.createdAt,
         updatedAt: entity.updatedAt,
+        friends,
+        generationCode: entity.generationCode,
+        generationNumber: entity.generationNumber,
       },
-      new UniqueEntityID(entity.id)
+      new UniqueEntityID(entity.id ?? entity._id.toString())
     ).unwrap();
   }
   public static DomainToPersistent(entity: Profile): Partial<ProfileEntity> {
@@ -36,6 +45,9 @@ export class ProfileMapper {
       available: entity.available,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      friendsIds: Array.from(entity.friends.keys()),
+      generationCode: entity.generationCode.isSome() ? entity.generationCode.unwrap() : undefined,
+      generationNumber: entity.generationNumber.isSome() ? entity.generationNumber.unwrap() : undefined,
     };
   }
   public static DomainToDto(entity: Profile): ProfileDto {
@@ -52,6 +64,12 @@ export class ProfileMapper {
       available: entity.available,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      friendsIds: Array.from(entity.friends.keys()),
+      friends: Array.from(entity.friends.values())
+        .filter(x => x.isSome())
+        .map(x => ProfileMapper.DomainToDto(x.unwrap())),
+      generationCode: entity.generationCode.isSome() ? entity.generationCode.unwrap() : undefined,
+      generationNumber: entity.generationNumber.isSome() ? entity.generationNumber.unwrap() : undefined,
     };
   }
 }

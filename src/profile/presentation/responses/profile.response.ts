@@ -27,4 +27,12 @@ export class ProfileDto {
   zipcode?: string;
   @Field()
   available: boolean;
+  @Field(() => [ID])
+  friendsIds: string[];
+  @Field(() => [ProfileDto], { nullable: true })
+  friends?: ProfileDto[];
+  @Field({ nullable: true })
+  generationCode?: string;
+  @Field({ nullable: true })
+  generationNumber?: number;
 }

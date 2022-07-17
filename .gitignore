@@ -2,7 +2,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
-yarn.lock
+#yarn.lock
 
 # OS
 .DS_Store
@@ -31,7 +31,7 @@ yarn.lock
 # GQL - Schema
 *.gql
 
-package-lock.json
+#package-lock.json
 orm.config.json
 ormconfig.json
 migrations
@@ -60,7 +60,6 @@ temp/
 $RECYCLE.BIN/
 
 Thumbs.db
-UserInterfaceState.x
 
 # Logs
 logs

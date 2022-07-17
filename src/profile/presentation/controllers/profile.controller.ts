@@ -17,6 +17,11 @@ import { UpdateProfileCommand } from '../../aplication/commands/impl/update-prof
 import { Body, Controller, Delete, Get, Headers, Param, Patch, Post, Query, Res } from '@nestjs/common';
 import { BaseController } from '../../../shared/core/presentation/BaseController';
 import { Response } from 'express';
+import { GenerateProfilesDto } from '../../aplication/dto/generate-profiles.dto';
+import { GenerateProfilesUseCaseResp } from '../../aplication/use-cases/generate-profiles/generate-profiles.use-case';
+import { GenerateProfilesCommand } from '../../aplication/commands/impl/generate-profiles.command';
+import { ShorterConnectionUseCaseResp } from '../../aplication/use-cases/shorter-connection/shorter-connection.use-case';
+import { ShorterConnectionQuery } from '../../aplication/queries/impl/shorter-connection.query';
 
 @Controller('profiles')
 export class ProfileController extends BaseController {
@@ -33,7 +38,10 @@ export class ProfileController extends BaseController {
     this._logger.log('findAll...');
     this._logger.debug(input);
     const resp = await this._qBus.execute(
-      new PaginatedFindProfileQuery(this.fixQuery<PaginatedFindProfileInput>(input))
+      new PaginatedFindProfileQuery({
+        ...this.fixQuery<PaginatedFindProfileInput>(input),
+        includes: ['friends'],
+      })
     );
     if (resp.isFailure) return this.fail(response, resp.unwrapError(), lang);
     const paginated = resp.unwrap();
@@ -57,7 +65,10 @@ export class ProfileController extends BaseController {
   ): Promise<Response> {
     this._logger.log('findOne...');
     const resp: FindOneProfileUseCaseResponse = await this._qBus.execute(
-      new FindOneProfileQuery(this.fixQuery<FindOneProfileInput>(input))
+      new FindOneProfileQuery({
+        ...this.fixQuery<FindOneProfileInput>(input),
+        includes: ['friends'],
+      })
     );
     if (resp.isFailure) return this.fail(response, resp.unwrapError(), lang);
     const itemOrNone = resp.unwrap().map(ProfileMapper.DomainToDto);
@@ -75,6 +86,7 @@ export class ProfileController extends BaseController {
     const resp: FindOneByIdProfileUseCaseResponse = await this._qBus.execute(
       new FindOneByIdProfileQuery({
         id,
+        includes: ['friends'],
       })
     );
     if (resp.isFailure) return this.fail(response, resp.unwrapError(), lang);
@@ -102,7 +114,7 @@ export class ProfileController extends BaseController {
   ): Promise<Response> {
     const resp: Result<void> = await this._cBus.execute(new DeleteProfileCommand({ id }));
     if (resp.isFailure) return this.fail(response, resp.unwrapError(), lang);
-    return this.ok(response);
+    return this.created(response);
   }
 
   @Patch(':id')
@@ -119,6 +131,61 @@ export class ProfileController extends BaseController {
       })
     );
     if (resp.isFailure) return this.fail(response, resp.unwrapError(), lang);
-    return this.ok(response);
+    return this.created(response);
+  }
+
+  @Post('generate-profiles')
+  async generateProfiles(
+    @Res() response: Response,
+    @Body() { profilesTotal, friendsTotal }: GenerateProfilesDto,
+    @Headers('current-language') lang?: string
+  ): Promise<Response> {
+    const resp: GenerateProfilesUseCaseResp = await this._cBus.execute(
+      new GenerateProfilesCommand({
+        profilesTotal,
+        friendsTotal,
+      })
+    );
+    if (resp.isFailure) return this.fail(response, resp.unwrapError(), lang);
+    return this.created(response, resp.unwrap());
+  }
+
+  @Get(':id/friends')
+  async getAllFriends(
+    @Res() response: Response,
+    @Param('id') id: string,
+    @Headers('current-language') lang?: string
+  ): Promise<Response> {
+    const resp = await this._qBus.execute(
+      new PaginatedFindProfileQuery({
+        where: { friendsIds: { include: id } },
+        pageParams: { pageNum: 1, pageLimit: 1000 },
+        includes: ['friends'],
+      })
+    );
+    if (resp.isFailure) return this.fail(response, resp.unwrapError(), lang);
+    const paginated = resp.unwrap();
+    return this.ok(response, paginated.items.map(ProfileMapper.DomainToDto));
+  }
+
+  @Get('shorter-connection/:startId/:endId')
+  async getShorterConnection(
+    @Res() response: Response,
+    @Param('startId') startId: string,
+    @Param('endId') endId: string,
+    @Headers('current-language') lang?: string
+  ): Promise<Response> {
+    const resp: ShorterConnectionUseCaseResp = await this._qBus.execute(
+      new ShorterConnectionQuery({
+        startId,
+        endId,
+      })
+    );
+    if (resp.isFailure) return this.fail(response, resp.unwrapError(), lang);
+    const data = resp.unwrap();
+    return this.ok(response, {
+      deepCount: data.deepCount,
+      friends: data.friends.map(ProfileMapper.DomainToDto),
+    });
   }
 }

@@ -23,6 +23,12 @@ import { Inject } from '@nestjs/common';
 import { PUB_SUB } from '../../../shared/modules/graphql/gql-pubsub.provider';
 import { PubSub } from 'apollo-server-express';
 import { ProfileEventsEnum } from '../../domain/events/profile-events.enum';
+import { GenerateProfilesResponse } from '../responses/generate-profiles.response';
+import { GenerateProfilesCommand } from '../../aplication/commands/impl/generate-profiles.command';
+import { GenerateProfilesUseCaseResp } from '../../aplication/use-cases/generate-profiles/generate-profiles.use-case';
+import { ShorterConnectionResponse } from '../responses/shorter-connection.response';
+import { ShorterConnectionQuery } from '../../aplication/queries/impl/shorter-connection.query';
+import { ShorterConnectionUseCaseResp } from '../../aplication/use-cases/shorter-connection/shorter-connection.use-case';
 
 @Resolver(() => ProfileDto)
 export class ProfileResolver extends BaseResolver {
@@ -44,6 +50,7 @@ export class ProfileResolver extends BaseResolver {
     const resp = await this._qBus.execute(
       new PaginatedFindProfileQuery({
         ...input,
+        includes: ['friends'],
       })
     );
     if (resp.isFailure) this.handleErrors(resp.unwrapError(), lang);
@@ -63,7 +70,9 @@ export class ProfileResolver extends BaseResolver {
     @CurrentLanguage() lang?: string
   ): Promise<ProfileDto | null> {
     this._logger.log('findOneProfile...');
-    const resp: FindOneProfileUseCaseResponse = await this._qBus.execute(new FindOneProfileQuery(input));
+    const resp: FindOneProfileUseCaseResponse = await this._qBus.execute(
+      new FindOneProfileQuery({ ...input, includes: ['friends'] })
+    );
     if (resp.isFailure) this.handleErrors(resp.unwrapError(), lang);
     const itemOrNone = resp.unwrap().map(ProfileMapper.DomainToDto);
     return itemOrNone.isNone() ? null : itemOrNone.unwrap();
@@ -78,11 +87,58 @@ export class ProfileResolver extends BaseResolver {
     const resp: FindOneByIdProfileUseCaseResponse = await this._qBus.execute(
       new FindOneByIdProfileQuery({
         id,
+        includes: ['friends'],
       })
     );
     if (resp.isFailure) this.handleErrors(resp.unwrapError(), lang);
     const itemOrNone = resp.unwrap().map(ProfileMapper.DomainToDto);
     return itemOrNone.isNone() ? null : itemOrNone.unwrap();
+  }
+
+  @Query(() => PaginatedProfilesResponse)
+  async getAllFriends(
+    @Args('id', { type: () => ID }) id: string,
+    // @Args({nullable: true}) input?: PaginatedFindProfileInput,
+    @CurrentLanguage() lang?: string
+  ): Promise<PaginatedProfilesResponse> {
+    this._logger.log('getAllFriends...');
+    const resp = await this._qBus.execute(
+      new PaginatedFindProfileQuery({
+        where: { friendsIds: { include: id } },
+        pageParams: { pageNum: 1, pageLimit: 1000 },
+        includes: ['friends'],
+      })
+    );
+    if (resp.isFailure) this.handleErrors(resp.unwrapError(), lang);
+    const paginated = resp.unwrap();
+    return new PaginatedProfilesResponse(
+      paginated.items,
+      paginated.limit,
+      paginated.currentPage,
+      paginated.totalPages,
+      paginated.totalItems
+    );
+  }
+
+  @Query(() => ShorterConnectionResponse)
+  async getShorterConnection(
+    @Args('startId', { type: () => ID }) startId: string,
+    @Args('endId', { type: () => ID }) endId: string,
+    @CurrentLanguage() lang?: string
+  ): Promise<ShorterConnectionResponse> {
+    this._logger.log('getShorterConnection...');
+    const resp: ShorterConnectionUseCaseResp = await this._qBus.execute(
+      new ShorterConnectionQuery({
+        startId,
+        endId,
+      })
+    );
+    if (resp.isFailure) this.handleErrors(resp.unwrapError(), lang);
+    const data = resp.unwrap();
+    return {
+      deepCount: data.deepCount,
+      friends: data.friends.map(ProfileMapper.DomainToDto),
+    };
   }
 
   @Mutation(() => SuccessResponse)
@@ -119,6 +175,28 @@ export class ProfileResolver extends BaseResolver {
     );
     if (resp.isFailure) this.handleErrors(resp.unwrapError(), lang);
     return new SuccessResponse();
+  }
+
+  @Mutation(() => GenerateProfilesResponse)
+  async generateProfiles(
+    @Args('profilesTotal', {
+      description: 'Total number of profiles to create',
+    })
+    profilesTotal: number,
+    @Args('friendsTotal', {
+      description: 'Total number of friends connections',
+    })
+    friendsTotal: number,
+    @CurrentLanguage() lang?: string
+  ): Promise<GenerateProfilesResponse> {
+    const resp: GenerateProfilesUseCaseResp = await this._cBus.execute(
+      new GenerateProfilesCommand({
+        profilesTotal,
+        friendsTotal,
+      })
+    );
+    if (resp.isFailure) this.handleErrors(resp.unwrapError(), lang);
+    return resp.unwrap();
   }
 
   @Subscription(() => ProfileDto, {
