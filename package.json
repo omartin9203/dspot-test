@@ -52,7 +52,7 @@
     "graphql-depth-limit": "^1.1.0",
     "graphql-scalars": "^1.4.0",
     "graphql-subscriptions": "^1.1.0",
-    "graphql-tools": "^6.0.15",
+    "graphql-tools": "^8.3.2",
     "handlebars": "^4.7.6",
     "lodash": "^4.17.20",
     "moment": "^2.29.1",
