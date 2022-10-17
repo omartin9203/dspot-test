@@ -15,7 +15,7 @@ services:
       POSTGRES_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
     depends_on:
       - mongodb
-      - postgres
+#      - postgres
     command: yarn start:dev
     volumes:
       - ./:/var/www/app
@@ -29,19 +29,19 @@ services:
     ports:
       - 27017:27017
 
-  postgres:
-    image: postgres
-    container_name: dspot-test-postgres
-    restart: always
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - '5432:5432'
-    volumes:
-      - postgres-db:/var/lib/postgresql/data
+#  postgres:
+#    image: postgres
+#    container_name: dspot-test-postgres
+#    restart: always
+#    environment:
+#      POSTGRES_DB: ${POSTGRES_DB}
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#    ports:
+#      - '5432:5432'
+#    volumes:
+#      - postgres-db:/var/lib/postgresql/data
 
 volumes:
   mongodata: {}
-  postgres-db:
+#  postgres-db:

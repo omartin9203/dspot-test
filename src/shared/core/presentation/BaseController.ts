@@ -23,6 +23,10 @@ export class BaseController {
     return res.status(HttpStatus.NOT_FOUND).send('NOT FOUND');
   }
 
+  public unauthorized(res: Response): Response {
+    return res.status(HttpStatus.UNAUTHORIZED).send('UNAUTHORIZED');
+  }
+
   public created<T>(res: Response, dto?: T): Response {
     return !!dto ? res.status(HttpStatus.CREATED).json(dto) : res.status(HttpStatus.CREATED).send('CREATED');
   }
