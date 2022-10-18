@@ -39,7 +39,7 @@ export class ZapierController extends BaseController {
     const resp: PaginatedFindProfileUseCaseResp = await this._qBus.execute(
       new PaginatedFindProfileQuery({
         pageParams: {
-          pageNum: !isNaN(Number(query.page)) ? +query.page + 1 : 1,
+          pageNum: !isNaN(Number(query.page)) ? +query.page : 1,
           pageLimit: !isNaN(Number(query.limit)) ? +query.limit : 10,
         },
         includes: ['friends'],
