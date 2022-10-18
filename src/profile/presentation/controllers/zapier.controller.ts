@@ -50,6 +50,15 @@ export class ZapierController extends BaseController {
     );
     if (resp.isFailure) return this.fail(response, resp.unwrapError());
     const paginated = resp.unwrap();
-    return this.ok(response, paginated.items.map(ProfileMapper.DomainToDto));
+    return this.ok(
+      response,
+      paginated.items.map(ProfileMapper.DomainToDto).map(x => ({
+        id: x.id,
+        job: 'FullStack Developer',
+        prev_stage: 'A',
+        current_stage: 'B',
+        candidate: x,
+      }))
+    );
   }
 }
