@@ -1,4 +1,4 @@
-import { Controller, Get, Headers, Query, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, Post, Query, Res } from '@nestjs/common';
 import { BaseController } from '../../../shared/core/presentation/BaseController';
 import { Response } from 'express';
 import { AppConfigService } from '../../../shared/modules/config/service/app-config-service';
@@ -17,8 +17,10 @@ type CandidateEventsQuery = {
 
 @Controller('zapier')
 export class ZapierController extends BaseController {
+  protected data: any[];
   constructor(readonly config: AppConfigService, readonly _qBus: QueryBus) {
     super();
+    this.data = [];
   }
   @Get('me')
   async me(@Res() response: Response, @Headers('X-API-KEY') apiKey?: string): Promise<Response> {
@@ -60,5 +62,22 @@ export class ZapierController extends BaseController {
         candidate: x,
       }))
     );
+  }
+
+  @Post('events')
+  subscribe(@Res() response: Response, @Body() event: unknown): Response {
+    this.data.push(event);
+    return this.ok(response);
+  }
+
+  @Delete('events')
+  unsubscribe(@Res() response: Response): Response {
+    this.data.push(event);
+    return this.ok(response);
+  }
+
+  @Get('events')
+  performList(@Res() response: Response): Response {
+    return this.ok(response, this.data);
   }
 }
