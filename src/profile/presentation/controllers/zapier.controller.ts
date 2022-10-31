@@ -72,7 +72,7 @@ export class ZapierController extends BaseController {
 
   @Delete('events')
   unsubscribe(@Res() response: Response): Response {
-    this.data.push(event);
+    this.data = [];
     return this.ok(response);
   }
 
